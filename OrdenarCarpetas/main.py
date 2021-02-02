@@ -19,8 +19,8 @@ exts_zips       = ['.zip','.rar']
 extsList            = exts_images + exts_documents + exts_videos + exts_music + exts_zips
 
 
-# PATH            = os.getcwd()
-PATH            = 'C:\\Users\\segur\\Downloads' #
+PATH            = os.getcwd()
+# PATH            = 'C:\\Users\\segur\\Downloads' #
 NEW_DIRECTORIES = ['Compress','Music','Images','Documents','Video']
 ARCHIVOS        = listdir( PATH )
 
