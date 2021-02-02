@@ -1,7 +1,6 @@
 import os
 from os import listdir
 import shutil
-from plyer import notification
 import logging
 
 
