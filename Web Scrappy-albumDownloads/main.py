@@ -3,14 +3,25 @@
 import urllib.request
 from bs4 import BeautifulSoup
 import requests
-# import tkinter as tk
 import os
 import re
+import threading
+import queue
 
 # url     = "https://buondua.com"        
 # page    = '?start=0'
 # search  ='?search=mini'
 
+
+def printProgressBar (iteration, total, prefix = 'Progress', suffix = 'Complete', decimals = 1, length = 50, fill = '█', printEnd = "\r"):
+
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end = printEnd)
+    # Print New Line on Complete
+    if iteration == total: 
+        print()
 
 def getNameSRC_album(thumbnail_url, album=True):
     albumNameRegex   = r"[\w\-\.]+(rCong.com|album)"
@@ -27,14 +38,13 @@ def create_album(album_name, album_path="album"):
 
     if not os.path.exists(path_directory):
         os.mkdir(path_directory)
-        print("-Directory \'{}\' created.".format(album_path))
+        # print("-Directory \'{}\' created.".format(album_path))
 
     if not os.path.exists(path_album):
         os.mkdir(path_album)
-        print("-Album  created. \'{}\'".format(path_album))
+        # print("-Album  created. \'{}\'".format(path_album))
     
-
-def download_album(url, album_name="unknow"):
+def download_album(url):
     path_directory  = os.path.join(os.getcwd(),"album") 
     album_name      = getNameSRC_album(url)
     image_name      = getNameSRC_album(url,album=False)
@@ -42,33 +52,47 @@ def download_album(url, album_name="unknow"):
     thumbnail_name  = os.path.join(path_directory, album_name, image_name)
     create_album(album_name)
     try:
-        print("Downloaded: "+image_name)
         urllib.request.urlretrieve(url, thumbnail_name)
     except Exception as identifier:
         print("Server failed.",identifier)
+
+def download(cola: queue.Queue, total: int ):
+    while True:
+        src_url = cola.get()
+        interval = total - cola.qsize()
+        prefix = "Progress {}/{}".format(interval,total)
+
+        download_album(src_url)
+        printProgressBar(interval,total,prefix=prefix)
+        cola.task_done()
+  
+def main(direction=None):
+
+    direction   = direction if direction else input("Ingresar link buondua> ")
+    html        = requests.get(direction).content
+    soup        = BeautifulSoup(html,'html.parser')
+
+    # src_test = "https://1.bp.blogspot.com/-gRr1GpPJZOE/YAWfTQcJyXI/AAAAAAADC3I/xlvz3-I_iYMddvTnXZG2FsoWljuSSgkGACLcBGAsYHQ/s0/YouMi-Vol.550-Victoria-Guo-Er-MrCong.com-024.jpg"
+
+    gallery         = soup.find(class_="article-fulltext")
+    images          = gallery.find_all(class_="item-image")
+    print("-Downloading {} files".format(len(images)))
+
+    hilos = 2
+    cola = queue.Queue()
     
+    for i in range(hilos):
+        x = threading.Thread(target=download, args=(cola,len(images)))
+        x.setDaemon(True)
+        x.start()
 
+    for image in images:
+        url = image['data-src']
+        cola.put(url)
+    cola.join()
 
-direction       = input("Ingresar link buondua> ")
-html    = requests.get(direction).content
-soup = BeautifulSoup(html,'html.parser')
-
-nombre = "https://1.bp.blogspot.com/-gRr1GpPJZOE/YAWfTQcJyXI/AAAAAAADC3I/xlvz3-I_iYMddvTnXZG2FsoWljuSSgkGACLcBGAsYHQ/s0/YouMi-Vol.550-Victoria-Guo-Er-MrCong.com-024.jpg"
-
-# thumbnailAlbum  = soup.find(class_='article-introimage')
-# titleAlbum      = soup.find(class_='article-header')
-gallery         = soup.find(class_="article-fulltext")
-images          = gallery.find_all(class_="item-image")
-# thumbnail_url   = thumbnailAlbum.img['src'].strip()
-# album_title     = titleAlbum.h1.get_text().strip()
-print("-Downloading {} files".format(len(images)))
-
-
-for image in images:
-    url = image['data-src']
-    download_album(url)
-
-
+if __name__ == '__main__':
+    main()
 
 
 
