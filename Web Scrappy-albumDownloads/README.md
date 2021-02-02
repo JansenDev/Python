@@ -8,4 +8,4 @@ https://buondua.com/coser-%E4%B8%80-%E5%B0%8F-%E5%A4%AE-%E6%B3%BD-yixiaoyangze-%
 
 NOTA: Esta pagina puede tener contenido sensible.
 
-![cmd album](https://user-images.githubusercontent.com/71657821/106661525-4cd90b80-656f-11eb-91b8-f48f78ed9fe2.png)
+![image](https://user-images.githubusercontent.com/71657821/106661653-742fd880-656f-11eb-9c7c-a034d581a355.png)
