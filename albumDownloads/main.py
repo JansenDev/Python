@@ -3,7 +3,6 @@
 import urllib.request
 from bs4 import BeautifulSoup
 import requests
-# import tkinter as tk
 import os
 import re
 
